@@ -6,7 +6,7 @@ PROVIDES = "drm"
 DEPENDS = "libpthread-stubs udev libpciaccess"
 DEFAULT_PREFERENCE = "1"
 
-SRCREV = "ddd35b310e54da1ee3953f207551d35392a469c7"
+SRCREV = "master"
 SRC_URI = "git://github.com/austriancoder/libdrm.git"
 
 inherit autotools pkgconfig
