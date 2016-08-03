@@ -2,11 +2,9 @@ require ${BPN}.inc
 
 DEFAULT_PREFERENCE = "1"
 
-#SRCREV = "ea0d1f575c214c09ba3df12644a960e86e031766"
 SRCREV = "e1ac825bd067f0bff475959dc41fccddc63bb0f9"
 PV = "12.0"
 
-#SRC_URI = "git://anongit.freedesktop.org/git/mesa/mesa;branch=10.5"
 SRC_URI = "git://github.com/etnaviv/mesa.git;branch=12.0_etnaviv"
 
 S = "${WORKDIR}/git"
