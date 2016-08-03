@@ -6,7 +6,7 @@ DEPENDS = "libdrm"
 DEFAULT_PREFERENCE = "1"
 
 SRCREV = "6b461c163b0bd02c76b65d94cc2fb3767167bda8"
-SRC_URI = "git://ftp.arm.linux.org.uk/~rmk/libdrm-armada.git"
+SRC_URI = "git://git.armlinux.org.uk/~rmk/libdrm-armada.git"
 
 inherit autotools pkgconfig
 
