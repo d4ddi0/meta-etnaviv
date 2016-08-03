@@ -7,6 +7,9 @@ Both the etnaviv driver stack and this yocto layer are works in progress.
 Use at your own risk, and if you find a bug with this layer, please let me
 know, and ideally send a pull request.
 
-To be clear, this etnaviv layer attempts to use the mainline kernel
-and most recent developer repositories. It makes no attempt to support
-any Vivante provided drivers or libraries.
+This yocto layer is incompatible with the freescale (now nxp)
+vendor provided Vivante (GalCore) libraries, and is thus explicitly
+unusable with the yocto layer provided by nxp for imx6 boards.
+
+To work, you will need a recent (v4.5 or higher) mainline Linux kernel with
+etnaviv drm enabled.
