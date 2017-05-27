@@ -1,15 +1,27 @@
-# meta-etnaviv
+meta-etnaviv
+============
 
-meta-etnaviv is a layer for yocto to build accelerated graphics for
-embedded Linux systems with a Vivante graphics chipset.
+meta-etnaviv is an OE/Yocto Project layer allowing the user to include the
+open-source etnaviv drm driver in their image.
 
-Both the etnaviv driver stack and this yocto layer are works in progress.
-Use at your own risk, and if you find a bug with this layer, please let me
-know, and ideally send a pull request.
+The etnaviv driver is an open-source, reverse-engineered alternative to the
+closed-source vivante driver for vivante GPU chipsets. The vivante GPU is most
+likely paired with NXP i.MX SoCs (e.g. i.MX6).
 
-This yocto layer is incompatible with the freescale (now nxp)
-vendor provided Vivante (GalCore) libraries, and is thus explicitly
-unusable with the yocto layer provided by nxp for imx6 boards.
+To enable, add this layer to your build, and add the following to your
+configuration:
 
-To work, you will need a recent (v4.5 or higher) mainline Linux kernel with
-etnaviv drm enabled.
+	MACHINEOVERRIDES .= ":use-mainline-bsp"
+
+
+Dependencies
+============
+
+This layer depends on:
+
+	git://git.openembedded.org/openembedded-core
+	layer: meta
+
+	https://git.yoctoproject.org/git/meta-freescale
+
+Please use corresponding branches on all layers (including this one).
