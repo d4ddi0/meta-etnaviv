@@ -7,7 +7,7 @@ DEPENDS = "libpthread-stubs udev libpciaccess"
 DEFAULT_PREFERENCE = "1"
 
 SRCREV = "master"
-SRC_URI = "git://github.com/austriancoder/libdrm.git"
+SRC_URI = "git://anongit.freedesktop.org/mesa/drm"
 
 inherit autotools pkgconfig
 

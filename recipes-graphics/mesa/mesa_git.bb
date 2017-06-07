@@ -2,7 +2,7 @@ require ${BPN}.inc
 
 DEFAULT_PREFERENCE = "1"
 
-SRCREV = "e1ac825bd067f0bff475959dc41fccddc63bb0f9"
+SRCREV = "mesa-17.1.1"
 PV = "12.0"
 
 SRC_URI = "git://github.com/etnaviv/mesa.git;branch=12.0_etnaviv"

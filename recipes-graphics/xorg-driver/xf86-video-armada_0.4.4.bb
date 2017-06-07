@@ -5,8 +5,11 @@ DESCRIPTION = "fbdev is an Xorg driver for framebuffer devices. This is a non-ac
 
 LIC_FILES_CHKSUM = "file://README;md5=398023ad112dd65d0461eef7380a005f"
 
-SRCREV = "0e61c4b137dcb546248aa1f3266eaf05ec5a68c1"
-SRC_URI = "git://github.com/xobs/xserver-xorg-video-armada;branch=novena-r3;protocol=http"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+SRCREV = "novena-r2"
+SRC_URI = "git://github.com/xobs/xserver-xorg-video-armada;branch=novena-r2;protocol=http \
+           file://xf86-video-armada.patch"
 
 S = "${WORKDIR}/git"
 
