@@ -1,0 +1,73 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_clear_blit.c b/src/gallium/drivers/etnaviv/etnaviv_clear_blit.c
+index ae1c5862880f..ea416bf192f3 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_clear_blit.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_clear_blit.c
+@@ -528,8 +528,9 @@ etna_try_rs_blit(struct pipe_context *pctx,
+ 
+ manual:
+    if (src->layout == ETNA_LAYOUT_TILED && dst->layout == ETNA_LAYOUT_TILED) {
+-      etna_resource_wait(pctx, dst);
+-      etna_resource_wait(pctx, src);
++      if ((src->status & ETNA_PENDING_WRITE) ||
++          (dst->status & ETNA_PENDING_WRITE))
++         pctx->flush(pctx, NULL, 0);
+       return etna_manual_blit(dst, dst_lev, dst_offset, src, src_lev, src_offset, blit_info);
+    }
+ 
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_resource.c b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+index 1341e1ea2314..9aa1aa617a51 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_resource.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+@@ -429,22 +429,6 @@ etna_resource_used(struct etna_context *ctx, struct pipe_resource *prsc,
+ }
+ 
+ void
+-etna_resource_wait(struct pipe_context *pctx, struct etna_resource *rsc)
+-{
+-   if (rsc->status & ETNA_PENDING_WRITE) {
+-      struct pipe_fence_handle *fence;
+-      struct pipe_screen *pscreen = pctx->screen;
+-
+-      pctx->flush(pctx, &fence, 0);
+-
+-      if (!pscreen->fence_finish(pscreen, pctx, fence, 5000000000ULL))
+-         BUG("fence timed out (hung GPU?)");
+-
+-      pscreen->fence_reference(pscreen, &fence, NULL);
+-   }
+-}
+-
+-void
+ etna_resource_screen_init(struct pipe_screen *pscreen)
+ {
+    pscreen->can_create_resource = etna_screen_can_create_resource;
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_resource.h b/src/gallium/drivers/etnaviv/etnaviv_resource.h
+index a8d42ee1a09f..913316f193c2 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_resource.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_resource.h
+@@ -124,9 +124,6 @@ void
+ etna_resource_used(struct etna_context *ctx, struct pipe_resource *prsc,
+                    enum etna_resource_status status);
+ 
+-void
+-etna_resource_wait(struct pipe_context *ctx, struct etna_resource *rsc);
+-
+ static inline void
+ resource_read(struct etna_context *ctx, struct pipe_resource *prsc)
+ {
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_transfer.c b/src/gallium/drivers/etnaviv/etnaviv_transfer.c
+index 4809b04ff95f..269bd498f89f 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_transfer.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_transfer.c
+@@ -199,8 +199,9 @@ etna_transfer_map(struct pipe_context *pctx, struct pipe_resource *prsc,
+    /* Always sync if we have the temporary resource.  The PIPE_TRANSFER_READ
+     * case could be optimised if we knew whether the resource has outstanding
+     * rendering. */
+-   if (usage & PIPE_TRANSFER_READ || trans->rsc)
+-      etna_resource_wait(pctx, rsc);
++   if ((usage & PIPE_TRANSFER_READ || trans->rsc) &&
++       rsc->status & ETNA_PENDING_WRITE)
++      pctx->flush(pctx, NULL, 0);
+ 
+    /* XXX we don't handle PIPE_TRANSFER_FLUSH_EXPLICIT; this flag can be ignored
+     * when mapping in-place,

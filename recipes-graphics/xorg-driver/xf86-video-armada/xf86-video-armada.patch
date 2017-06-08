@@ -1,0 +1,64 @@
+diff --git a/common/compat-api.h b/common/compat-api.h
+index 993daa0..d41042e 100644
+--- a/common/compat-api.h
++++ b/common/compat-api.h
+@@ -76,8 +76,17 @@
+ 
+ #define SCREEN_INIT_ARGS_DECL ScreenPtr pScreen, int argc, char **argv
+ 
++#if ABI_VIDEODRV_VERSION >= SET_ABI_VERSION(22,0)
++#define HAVE_NOTIFY_FD	1
++#endif
++
++#if ABI_VIDEODRV_VERSION >= SET_ABI_VERSION(23, 0)
++#define BLOCKHANDLER_ARGS_DECL ScreenPtr arg, pointer pTimeout
++#define BLOCKHANDLER_ARGS arg, pTimeout
++#else
+ #define BLOCKHANDLER_ARGS_DECL ScreenPtr arg, pointer pTimeout, pointer pReadmask
+ #define BLOCKHANDLER_ARGS arg, pTimeout, pReadmask
++#endif
+ 
+ #define CLOSE_SCREEN_ARGS_DECL ScreenPtr pScreen
+ #define CLOSE_SCREEN_ARGS pScreen
+diff --git a/src/common_drm.c b/src/common_drm.c
+index 76ca3bd..6f149f5 100644
+--- a/src/common_drm.c
++++ b/src/common_drm.c
+@@ -1317,6 +1317,14 @@ Bool common_drm_PreScreenInit(ScreenPtr pScreen)
+ 
+ 	return TRUE;
+ }
++#if HAVE_NOTIFY_FD
++static void
++drmmode_notify_fd(int fd, int notify, void *data)
++{
++	struct common_drm_info *drm = data;
++        drmHandleEvent(drm->fd, &drm->event_context);
++}
++#else
+ 
+ static void common_drm_wakeup_handler(pointer data, int err, pointer p)
+ {
+@@ -1329,6 +1337,7 @@ static void common_drm_wakeup_handler(pointer data, int err, pointer p)
+ 	if (FD_ISSET(drm->fd, read_mask))
+ 		drmHandleEvent(drm->fd, &drm->event_context);
+ }
++#endif
+ 
+ Bool common_drm_PostScreenInit(ScreenPtr pScreen)
+ {
+@@ -1396,9 +1405,13 @@ Bool common_drm_PostScreenInit(ScreenPtr pScreen)
+ 	xf86DPMSInit(pScreen, xf86DPMSSet, 0);
+ 
+ 	/* Setup the synchronisation feedback */
++#if HAVE_NOTIFY_FD
++	SetNotifyFd(drm->fd, drmmode_notify_fd, X_NOTIFY_READ, drm);
++#else
+ 	AddGeneralSocket(drm->fd);
+ 	RegisterBlockAndWakeupHandlers((BlockHandlerProcPtr)NoopDDA,
+-				       common_drm_wakeup_handler, drm);
++                                       common_drm_wakeup_handler, drm);
++#endif
+ 
+ #ifdef HAVE_UDEV
+ 	if (!common_drm_udev_init(pScreen)) {
